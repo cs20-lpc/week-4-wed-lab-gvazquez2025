@@ -1,40 +1,47 @@
 template <typename T>
-LinkedList<T>::LinkedList()
-: head(nullptr) { }
+void LinkedList<T>::copy(const LinkedList<T>& copyObj) {
+    // clear just in case (not strictly necessary since we use this in ctor/assignment)
+    head = nullptr;
+    this->length = 0;
 
-template <typename T>
-LinkedList<T>::LinkedList(const LinkedList<T>& copyObj) {
-    copy(copyObj);
-}
-
-template <typename T>
-LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& rightObj) {
-    if (this != &rightObj) {
-        clear();
-        copy(rightObj);
+    if (copyObj.head == nullptr) {
+        return; // nothing to copy
     }
-    return *this;
+
+    // copy first node
+    head = new Node(copyObj.head->value);
+    this->length = 1;
+
+    Node* currNew = head;
+    Node* currOld = copyObj.head->next;
+
+    while (currOld != nullptr) {
+        currNew->next = new Node(currOld->value);
+        currNew = currNew->next;
+        currOld = currOld->next;
+        this->length++;
+    }
 }
 
 template <typename T>
-LinkedList<T>::~LinkedList() {
-    clear();
-}
+void LinkedList<T>::insert(int position, const T& elem) {
+    if (position < 0 || position > this->length) {
+        throw string("insert: error, position out of bounds");
+    }
 
-template <typename T>
-void LinkedList<T>::append(const T& elem) {
     Node* n = new Node(elem);
 
-    if (head == nullptr) {
+    // insert at front
+    if (position == 0) {
+        n->next = head;
         head = n;
     }
     else {
         Node* curr = head;
-
-        while (curr->next != nullptr) {
+        for (int i = 0; i < position - 1; i++) {
             curr = curr->next;
         }
-
+        n->next = curr->next;
         curr->next = n;
     }
 
@@ -42,89 +49,26 @@ void LinkedList<T>::append(const T& elem) {
 }
 
 template <typename T>
-void LinkedList<T>::clear() {
-    Node* prev = nullptr;
-
-    while (head != nullptr) {
-        prev = head;
-        head = head->next;
-        delete prev;
-    }
-
-    this->length = 0;
-}
-
-template <typename T>
-void LinkedList<T>::copy(const LinkedList<T>& copyObj) {
-    // TODO
-}
-
-template <typename T>
-T LinkedList<T>::getElement(int position) const {
-    if (position < 0 || position >= this->length) {
-        throw string("getElement: error, position out of bounds");
-    }
-    
-    Node* curr = head;
-
-    for (int i = 0; i < position; i++) {
-        curr = curr->next;
-    }
-
-    return curr->value;
-}
-
-template <typename T>
-int LinkedList<T>::getLength() const {
-    return this->length;
-}
-
-template <typename T>
-void LinkedList<T>::insert(int position, const T& elem) {
-    // TODO
-}
-
-template <typename T>
-bool LinkedList<T>::isEmpty() const {
-    return this->length == 0;
-}
-
-template <typename T>
 void LinkedList<T>::remove(int position) {
-    // TODO
-}
-
-template <typename T>
-void LinkedList<T>::replace(int position, const T& elem) {
     if (position < 0 || position >= this->length) {
-        throw string("replace: error, position out of bounds");
+        throw string("remove: error, position out of bounds");
     }
 
-    Node* curr = head;
+    Node* toDelete = nullptr;
 
-    for (int i = 0; i < position; i++) {
-        curr = curr->next;
-    }
-
-    curr->value = elem;
-}
-
-template <typename T>
-ostream& operator<<(ostream& outStream, const LinkedList<T>& myObj) {
-    if (myObj.isEmpty()) {
-        outStream << "List is empty, no elements to display.\n";
+    if (position == 0) {
+        toDelete = head;
+        head = head->next;
     }
     else {
-        typename LinkedList<T>::Node* curr = myObj.head;
-        while (curr != nullptr) {
-            outStream << curr->value;
-            if (curr->next != nullptr) {
-                outStream << " --> ";
-            }
+        Node* curr = head;
+        for (int i = 0; i < position - 1; i++) {
             curr = curr->next;
         }
-        outStream << endl;
+        toDelete = curr->next;
+        curr->next = toDelete->next;
     }
 
-    return outStream;
+    delete toDelete;
+    this->length--;
 }
