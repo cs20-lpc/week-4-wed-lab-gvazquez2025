@@ -1,74 +1,93 @@
 template <typename T>
-void LinkedList<T>::copy(const LinkedList<T>& copyObj) {
-    // clear just in case (not strictly necessary since we use this in ctor/assignment)
-    head = nullptr;
-    this->length = 0;
+LinkedList<T>::LinkedList()
+: head(nullptr) { }
 
-    if (copyObj.head == nullptr) {
-        return; // nothing to copy
-    }
-
-    // copy first node
-    head = new Node(copyObj.head->value);
-    this->length = 1;
-
-    Node* currNew = head;
-    Node* currOld = copyObj.head->next;
-
-    while (currOld != nullptr) {
-        currNew->next = new Node(currOld->value);
-        currNew = currNew->next;
-        currOld = currOld->next;
-        this->length++;
-    }
+template <typename T>
+LinkedList<T>::~LinkedList() {
+    clear();
 }
 
 template <typename T>
-void LinkedList<T>::insert(int position, const T& elem) {
-    if (position < 0 || position > this->length) {
-        throw string("insert: error, position out of bounds");
-    }
-
-    Node* n = new Node(elem);
-
-    // insert at front
-    if (position == 0) {
-        n->next = head;
-        head = n;
-    }
-    else {
+void LinkedList<T>::append(const T& elem) {
+    // TODO
+    Node* newNode = new Node(elem);
+    if (head == nullptr) {
+        head = newNode;
+    } else {
         Node* curr = head;
-        for (int i = 0; i < position - 1; i++) {
+        while (curr->next != nullptr) {
             curr = curr->next;
         }
-        n->next = curr->next;
-        curr->next = n;
+        curr->next = newNode;
     }
-
     this->length++;
 }
 
 template <typename T>
-void LinkedList<T>::remove(int position) {
-    if (position < 0 || position >= this->length) {
-        throw string("remove: error, position out of bounds");
+void LinkedList<T>::clear() {
+    // TODO
+    Node* curr = head;
+    while (curr != nullptr) {
+        Node* temp = curr;
+        curr = curr->next;
+        delete temp;
     }
+    head = nullptr;
+    this->length = 0;
+}
 
-    Node* toDelete = nullptr;
+template <typename T>
+T LinkedList<T>::getElement(int position) const {
+    // TODO
+    if (position < 0 || position >= this->length) {
+        throw string("Invalid position");
+    }
+    Node* curr = head;
+    for (int i = 0; i < position; i++) {
+        curr = curr->next;
+    }
+    return curr->value;
+}
 
-    if (position == 0) {
-        toDelete = head;
-        head = head->next;
+template <typename T>
+int LinkedList<T>::getLength() const {
+    return this->length;
+}
+
+template <typename T>
+bool LinkedList<T>::isEmpty() const {
+    return this->length == 0;
+}
+
+template <typename T>
+void LinkedList<T>::replace(int position, const T& elem) {
+    // TODO
+    if (position < 0 || position >= this->length) {
+        throw string("Invalid position");
+    }
+    Node* curr = head;
+    for (int i = 0; i < position; i++) {
+        curr = curr->next;
+    }
+    curr->value = elem;
+}
+
+template <typename T>
+ostream& operator<<(ostream& outStream, const LinkedList<T>& myObj) {
+    if (myObj.isEmpty()) {
+        outStream << "List is empty, no elements to display.\n";
     }
     else {
-        Node* curr = head;
-        for (int i = 0; i < position - 1; i++) {
+        typename LinkedList<T>::Node* curr = myObj.head;
+        while (curr != nullptr) {
+            outStream << curr->value;
+            if (curr->next != nullptr) {
+                outStream << " --> ";
+            }
             curr = curr->next;
         }
-        toDelete = curr->next;
-        curr->next = toDelete->next;
+        outStream << endl;
     }
 
-    delete toDelete;
-    this->length--;
+    return outStream;
 }
